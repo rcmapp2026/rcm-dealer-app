@@ -1,0 +1,51 @@
+
+{
+  "name": "rcm-dealer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "sync": "npx cap sync",
+    "master-sync": "npm run build && npx cap sync",
+    "rcm-inject": "python auto_setup_dealer.py",
+    "cap-build": "npm run build && npx cap sync && npm run rcm-inject"
+  },
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.2",
+    "qrcode": "^1.5.4",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.4.0",
+    "lucide-react": "^0.562.0",
+    "framer-motion": "^12.23.26",
+    "@supabase/supabase-js": "^2.48.1",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "firebase": "^12.7.0",
+    "@capacitor/push-notifications": "^8.0.0",
+    "@capacitor/share": "^8.0.0",
+    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/camera": "^8.0.0",
+    "@capacitor/geolocation": "^8.0.0",
+    "@capacitor-community/fcm": "^8.1.0",
+    "capacitor-native-settings": "^7.0.2",
+    "@google/genai": "^1.34.0",
+    "react-hot-toast": "^2.6.0",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.38",
+    "autoprefixer": "^10.4.19",
+    "@capacitor/cli": "^8.0.0",
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.1.2",
+    "typescript": "~5.8.2",
+    "vite": "^7.3.0"
+  }
+}

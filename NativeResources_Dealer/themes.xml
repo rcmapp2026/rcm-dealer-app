@@ -1,0 +1,22 @@
+
+<resources>
+    <style name="Theme.RCMDealerPro" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Brand Colors -->
+        <item name="colorPrimary">@color/rcm_bg</item>
+        <item name="colorPrimaryVariant">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/rcm_blue</item>
+        <item name="colorOnSecondary">@color/black</item>
+        
+        <!-- Status Bar Config -->
+        <item name="android:statusBarColor">@color/rcm_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- Navigation Bar Config -->
+        <item name="android:navigationBarColor">@color/rcm_bg</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        
+        <!-- Background -->
+        <item name="android:windowBackground">@color/rcm_bg</item>
+    </style>
+</resources>

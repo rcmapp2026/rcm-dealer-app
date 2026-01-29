@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#020617" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>RCM Dealer Pro</title>
+
+    <!-- Restore Tailwind CDN for instant styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ['Plus Jakarta Sans', 'sans-serif'],
+              },
+              colors: {
+                brand: {
+                  blue: '#0057FF',
+                  orange: '#F36F21',
+                  red: '#FF0000',
+                  green: '#008000',
+                  navy: '#0F172A',
+                  surface: '#FFFFFF'
+                }
+              }
+            }
+          }
+        }
+    </script>
+
+    <style>
+        :root {
+          --sat: env(safe-area-inset-top);
+          --sab: env(safe-area-inset-bottom);
+          --sal: env(safe-area-inset-left);
+          --sar: env(safe-area-inset-right);
+        }
+
+        html, body {
+          height: 100dvh;
+          width: 100vw;
+          margin: 0;
+          padding: 0;
+          background: #FFFFFF !important; /* Changed to white to avoid black screen look */
+          overflow: hidden;
+          overscroll-behavior: none;
+        }
+
+        #root {
+          height: 100%;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          background: #FFFFFF;
+          padding-top: var(--sat);
+          padding-bottom: var(--sab);
+          padding-left: var(--sal);
+          padding-right: var(--sar);
+        }
+
+        body {
+          color: #000000 !important;
+          -webkit-tap-highlight-color: transparent;
+          font-weight: 900 !important;
+          -webkit-font-smoothing: antialiased;
+        }
+
+        main {
+          flex: 1;
+          overflow-y: auto !important;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        * {
+          font-weight: 900 !important;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          box-sizing: border-box;
+        }
+
+        .active-scale:active { transform: scale(0.97); }
+
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .cd-disc {
+          animation: spin-slow 12s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-white">
+<div id="root"></div>
+<!-- Crucial: Use ./ for local pathing in APK -->
+<script type="module" src="./index.tsx"></script>
+</body>
+</html>

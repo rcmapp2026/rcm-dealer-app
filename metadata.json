@@ -1,0 +1,9 @@
+{
+  "name": "RCM Dealer",
+  "description": "Official mobile terminal for RCM Hardware partners to manage inventory, track orders, and view financial ledgers.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
