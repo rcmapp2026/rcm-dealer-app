@@ -7,6 +7,7 @@ import { supabaseService } from './services/supabaseService';
 import { WifiOff, Loader2 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { App as CapacitorApp } from '@capacitor/app';
 
 const HomeView = lazy(() => import('./components/HomeView').then(m => ({ default: m.HomeView })));
 const LoginView = lazy(() => import('./components/LoginView').then(m => ({ default: m.LoginView })));
@@ -35,6 +36,16 @@ const App: React.FC = () => {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [rcmCategory, setRcmCategory] = useState<string | null>(null);
   const [hardwareCategory, setHardwareCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+      if (activeTab !== 'home') {
+        setActiveTab('home');
+      } else {
+        CapacitorApp.exitApp();
+      }
+    });
+  }, [activeTab]);
 
   const fetchData = useCallback(async (userId: string) => {
     if (!navigator.onLine || !userId) return;
