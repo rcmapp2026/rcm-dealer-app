@@ -188,20 +188,13 @@ const App: React.FC = () => {
 
   if (loading) return null;
 
-  if (registeredDealer) {
-    return <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}><RegistrationSuccess dealer={registeredDealer} onComplete={() => { setRegisteredDealer(null); setShowRegistration(false); }} /></Suspense>;
-  }
-
-  if (showRegistration) {
-    return <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}><RegistrationForm 
-      onBack={() => setShowRegistration(false)} 
-      onSuccess={(dealer) => {
-        setRegisteredDealer(dealer);
-      }}
-    /></Suspense>;
-  }
-
   if (!isLoggedIn || !user) {
+    if (registeredDealer) {
+        return <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}><RegistrationSuccess dealer={registeredDealer} onComplete={() => { setRegisteredDealer(null); setShowRegistration(false); }} /></Suspense>;
+    }
+    if (showRegistration) {
+        return <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}><RegistrationForm onBack={() => setShowRegistration(false)} onSuccess={(dealer) => setRegisteredDealer(dealer)} /></Suspense>;
+    }
     return (
       <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}>
         <LoginView
@@ -220,7 +213,6 @@ const App: React.FC = () => {
     );
   }
 
-  // Show a mini loader while switching states after login
   if (isFetchingData && !user.owner_name) {
     return (
         <div className="min-h-screen bg-white flex items-center justify-center">
@@ -229,7 +221,7 @@ const App: React.FC = () => {
     );
   }
 
-  const renderContent = () => {
+  const renderMainContent = () => {
     if (!user) return null;
     switch (activeTab) {
       case 'home': return <HomeView user={user} ledger={ledger} offers={offers} orders={orders} products={products} categories={categories} onNavigate={handleNavigation} companyProfile={companySettings} onSync={() => fetchData(user.id)} />;
@@ -241,7 +233,7 @@ const App: React.FC = () => {
       case 'offers': return <OffersView offers={offers} onRefresh={() => fetchData(user.id)} />;
       case 'support': return <SupportView user={user} />;
       case 'notifications': return <NotificationView notifications={notifications} onMarkRead={() => {}} onRefresh={() => fetchData(user.id)} />;
-      case 'cart': return <CartView user={user} cartItemsProps={cartItems} onOrderPlaced={() => { fetchData(user.id); setActiveTab('orders'); }} isOnline={true} onRefresh={() => fetchData(user.id)} companyProfile={companySettings} />;
+      case 'cart': return <CartView user={user} cartItemsProps={cartItems} onOrderPlaced={() => { fetchData(user.id); setActiveTab('orders'); }} isOnline={true} onRefresh={() => fetchData(user.id)} companyProfile={companySettings} onClose={() => setActiveTab('home')} />;
       default: return <HomeView user={user} ledger={ledger} offers={offers} orders={orders} products={products} categories={categories} onNavigate={handleNavigation} companyProfile={companySettings} onSync={() => fetchData(user.id)} />;
     }
   };
@@ -264,7 +256,7 @@ const App: React.FC = () => {
       >
         <div className="h-full bg-white">
           <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}>
-            {renderContent()}
+            {renderMainContent()}
           </Suspense>
         </div>
       </Layout>
