@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabaseService } from '../services/supabaseService';
 import { UserProfile, LedgerEntry, LedgerSummary } from '../types';
-import { ArrowUpRight, ArrowDownLeft, RefreshCw, X } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, RefreshCw, X, ArrowLeft } from 'lucide-react';
 
 interface LedgerViewProps {
   user: UserProfile;
@@ -27,9 +27,39 @@ export const LedgerView: React.FC<LedgerViewProps> = ({ user, summary, onRefresh
     fetchLedger();
   }, [user.id]);
 
-  // Positive due_amount means dealer owes money (RED)
-  // Negative due_amount means dealer has surplus (GREEN)
   const isDue = (summary.due_amount || 0) > 0;
+
+  if (selectedTx) {
+      return (
+        <div className="bg-white min-h-screen pb-40 px-6 pt-8 font-bold">
+            <header className="flex items-center gap-4 mb-8">
+                <button onClick={() => setSelectedTx(null)} className="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-black">
+                    <ArrowLeft size={24} />
+                </button>
+                <h1 className="text-2xl font-bold text-black tracking-tighter uppercase italic">Transaction Details</h1>
+            </header>
+            <div className="p-8 text-center space-y-8">
+                <div className="space-y-2">
+                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">Amount</p>
+                    <h1 className={`text-4xl font-bold italic ${selectedTx.type.toLowerCase() === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+                    ₹{Number(selectedTx.amount).toLocaleString()}
+                    </h1>
+                </div>
+                <div className="p-6 bg-slate-50 rounded-3xl space-y-4 text-left">
+                    <div>
+                        <p className="text-[10px] text-slate-400 uppercase">Remark</p>
+                        <p className="text-sm italic uppercase">{selectedTx.narration || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-slate-400 uppercase">Date & Time</p>
+                        <p className="text-sm italic uppercase">{new Date(selectedTx.date).toLocaleString()}</p>
+                    </div>
+                </div>
+                <button onClick={() => setSelectedTx(null)} className="w-full h-14 bg-red-600 text-white rounded-2xl font-bold uppercase tracking-widest italic">Close Details</button>
+            </div>
+        </div>
+      )
+  }
 
   return (
     <div className="bg-white min-h-screen pb-40 px-6 pt-8 font-bold">
@@ -81,36 +111,6 @@ export const LedgerView: React.FC<LedgerViewProps> = ({ user, summary, onRefresh
             })}
           </div>
       </div>
-
-      {selectedTx && (
-        <div className="fixed inset-0 z-[150] bg-white flex flex-col font-bold">
-          <header className="h-16 px-6 flex items-center justify-between border-b-2 border-slate-50">
-            <h2 className="text-sm font-bold text-black uppercase italic">Transaction Details</h2>
-            <button onClick={() => setSelectedTx(null)} className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center text-black">
-              <X size={20} />
-            </button>
-          </header>
-          <div className="p-8 text-center space-y-8">
-             <div className="space-y-2">
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest">Amount</p>
-                <h1 className={`text-4xl font-bold italic ${selectedTx.type.toLowerCase() === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
-                  ₹{Number(selectedTx.amount).toLocaleString()}
-                </h1>
-             </div>
-             <div className="p-6 bg-slate-50 rounded-3xl space-y-4 text-left">
-                <div>
-                   <p className="text-[10px] text-slate-400 uppercase">Remark</p>
-                   <p className="text-sm italic uppercase">{selectedTx.narration || 'N/A'}</p>
-                </div>
-                <div>
-                   <p className="text-[10px] text-slate-400 uppercase">Date & Time</p>
-                   <p className="text-sm italic uppercase">{new Date(selectedTx.date).toLocaleString()}</p>
-                </div>
-             </div>
-             <button onClick={() => setSelectedTx(null)} className="w-full h-14 bg-red-600 text-white rounded-2xl font-bold uppercase tracking-widest italic">Close Details</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

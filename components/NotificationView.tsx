@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { AppNotification } from '../types';
-import { Bell, RefreshCw, ChevronRight, X } from 'lucide-react';
+import { Bell, RefreshCw, ChevronRight, X, ArrowLeft } from 'lucide-react';
 import { motion as m, AnimatePresence } from 'framer-motion';
 
 const motion = m as any;
@@ -20,6 +20,36 @@ export const NotificationView: React.FC<Props> = ({ notifications, onMarkRead, o
         onMarkRead(n.id);
         setSelectedNotif(n);
     };
+
+    if (selectedNotif) {
+        return (
+            <div className="bg-white min-h-screen pb-40 px-6 pt-8 font-bold">
+                <header className="flex items-center gap-4 mb-8">
+                    <button onClick={() => setSelectedNotif(null)} className="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-black">
+                        <ArrowLeft size={24} />
+                    </button>
+                    <h1 className="text-2xl font-bold text-black tracking-tighter uppercase italic">Notification</h1>
+                </header>
+
+                <div className="flex-1 overflow-y-auto space-y-6">
+                    <div className="space-y-2">
+                        <h1 className="text-2xl font-bold text-black uppercase italic tracking-tighter">{selectedNotif.title}</h1>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">{new Date(selectedNotif.created_at).toLocaleString()}</p>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-3xl border-2 border-slate-100">
+                        <p className="text-black text-sm font-bold uppercase italic leading-relaxed">{selectedNotif.message}</p>
+                    </div>
+
+                    {selectedNotif.image_url && (
+                        <div className="rounded-3xl overflow-hidden border-4 border-slate-50 shadow-md">
+                            <img src={selectedNotif.image_url} className="w-full h-auto" alt="" />
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-white min-h-screen pb-40 px-6 pt-8 font-bold">
@@ -66,40 +96,6 @@ export const NotificationView: React.FC<Props> = ({ notifications, onMarkRead, o
                     })}
                 </div>
             )}
-
-            <AnimatePresence>
-                {selectedNotif && (
-                    <div className="fixed inset-0 z-[150] bg-white flex flex-col font-bold">
-                        <header className="h-16 px-6 flex items-center justify-between border-b-2 border-slate-50">
-                            <h2 className="text-sm font-bold text-black uppercase italic">Notification Details</h2>
-                            <button onClick={() => setSelectedNotif(null)} className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center text-black">
-                                <X size={20} />
-                            </button>
-                        </header>
-
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                            <div className="space-y-2">
-                                <h1 className="text-2xl font-bold text-black uppercase italic tracking-tighter">{selectedNotif.title}</h1>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase">{new Date(selectedNotif.created_at).toLocaleString()}</p>
-                            </div>
-
-                            <div className="p-6 bg-slate-50 rounded-3xl border-2 border-slate-100">
-                                <p className="text-black text-sm font-bold uppercase italic leading-relaxed">{selectedNotif.message}</p>
-                            </div>
-
-                            {selectedNotif.image_url && (
-                                <div className="rounded-3xl overflow-hidden border-4 border-slate-50 shadow-md">
-                                    <img src={selectedNotif.image_url} className="w-full h-auto" alt="" />
-                                </div>
-                            )}
-
-                            <button onClick={() => setSelectedNotif(null)} className="w-full h-14 bg-red-600 text-white rounded-2xl font-bold uppercase tracking-widest italic">
-                                CLOSE
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </AnimatePresence>
         </div>
     );
 };

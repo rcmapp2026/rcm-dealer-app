@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { UserProfile } from '../types';
 import { supabaseService } from '../services/supabaseService';
-import { User, Camera, Loader2, X } from 'lucide-react';
+import { User, Camera, Loader2, X, ArrowLeft } from 'lucide-react';
 
 interface ProfileViewProps {
   user: UserProfile;
@@ -41,6 +41,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ user, onUpdate }) => {
   const getChequeImageUrl = (imageName: string) => {
     const { data } = supabaseService.supabase.storage.from('cheques_images').getPublicUrl(imageName);
     return data.publicUrl;
+  }
+
+  if (selectedImage) {
+    return (
+        <div className="bg-white min-h-screen pb-40 px-6 pt-8 font-bold">
+            <header className="flex items-center gap-4 mb-8">
+                <button onClick={() => setSelectedImage(null)} className="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-black">
+                    <ArrowLeft size={24} />
+                </button>
+                <h1 className="text-2xl font-bold text-black tracking-tighter uppercase italic">Cheque Image</h1>
+            </header>
+            <div className="relative p-4 bg-white rounded-lg max-w-3xl max-h-[90vh]">
+                <img src={selectedImage} alt="Full-size cheque" className="rounded-lg object-contain h-full w-full" />
+            </div>
+        </div>
+    )
   }
 
   return (
@@ -91,17 +107,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ user, onUpdate }) => {
                 onClick={() => setSelectedImage(getChequeImageUrl(url))}
               />
             ))}
-          </div>
-        </div>
-      )}
-
-      {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setSelectedImage(null)}>
-          <div className="relative p-4 bg-white rounded-lg max-w-3xl max-h-[90vh]">
-            <button onClick={() => setSelectedImage(null)} className="absolute -top-4 -right-4 bg-white text-slate-600 rounded-full p-1.5 z-10">
-              <X size={20}/>
-            </button>
-            <img src={selectedImage} alt="Full-size cheque" className="rounded-lg object-contain h-full w-full" />
           </div>
         </div>
       )}

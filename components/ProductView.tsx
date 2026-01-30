@@ -1,6 +1,6 @@
 
 import { motion as m, AnimatePresence } from 'framer-motion';
-import { Box, Check, Hash, Loader2, Minus, Plus, RefreshCw, ShoppingBag, ShoppingCart, X } from 'lucide-react';
+import { Box, Check, Hash, Loader2, Minus, Plus, RefreshCw, ShoppingBag, ShoppingCart, X, ArrowLeft } from 'lucide-react';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { supabaseService } from '../services/supabaseService';
@@ -19,6 +19,7 @@ interface ProductViewProps {
   onNavigate: (tab: string, filterValue?: any) => void;
   selectedCategory: string | null;
   onSelectCategory: (category: string | null) => void;
+  onDetailToggle: (isOpen: boolean) => void;
 }
 
 export const ProductView: React.FC<ProductViewProps> = ({
@@ -31,14 +32,14 @@ export const ProductView: React.FC<ProductViewProps> = ({
   selectedProductId,
   onNavigate,
   selectedCategory,
-  onSelectCategory
+  onSelectCategory,
+  onDetailToggle
 }) => {
   const [internalProducts, setInternalProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [addingId, setAddingId] = useState<string | null>(null);
   const productRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
     if (propsProducts && propsProducts.length > 0) {
@@ -94,16 +95,25 @@ export const ProductView: React.FC<ProductViewProps> = ({
   };
 
   const handleProductSelect = (product: Product) => {
-    setScrollPosition(window.scrollY);
     setSelectedProduct(product);
+    onDetailToggle(true);
   };
 
   const handleProductDeselect = () => {
     setSelectedProduct(null);
-    setTimeout(() => {
-        window.scrollTo({ top: scrollPosition, behavior: 'auto' });
-    }, 0);
+    onDetailToggle(false);
   };
+  
+  if (selectedProduct) {
+      return (
+          <ProductDetails
+            product={selectedProduct}
+            onClose={handleProductDeselect}
+            onAddToCart={onAddToCart}
+            onOpenCart={onOpenCart}
+          />
+      )
+  }
 
   return (
     <div className="bg-white min-h-screen pb-40 font-black">
@@ -189,17 +199,6 @@ export const ProductView: React.FC<ProductViewProps> = ({
           </div>
         )}
       </div>
-
-      <AnimatePresence>
-        {selectedProduct && (
-          <ProductDetails
-            product={selectedProduct}
-            onClose={handleProductDeselect}
-            onAddToCart={onAddToCart}
-            onOpenCart={onOpenCart}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 };
@@ -294,16 +293,13 @@ const ProductDetails: React.FC<{
   };
 
   return (
-    <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} className="fixed inset-0 z-[100] bg-white flex flex-col font-black">
-      <header className="h-12 px-4 flex items-center justify-between border-b border-slate-100 shrink-0">
-        <button onClick={onClose} className="w-8 h-8 bg-white border border-slate-200 rounded-lg flex items-center justify-center active:scale-90 text-black">
-          <X size={16} strokeWidth={3} />
-        </button>
-        <h2 className="text-[8px] italic text-slate-400 tracking-[0.2em] font-black uppercase">Analysis Terminal</h2>
-        <button onClick={onOpenCart} className="w-8 h-8 bg-white border border-slate-200 rounded-lg flex items-center justify-center active:scale-90 text-brand-blue">
-          <ShoppingBag size={16} strokeWidth={3} />
-        </button>
-      </header>
+    <div className="bg-white min-h-screen font-black">
+        <header className="h-16 px-6 flex items-center gap-4 border-b-2 border-slate-50 sticky top-0 bg-white z-10">
+            <button onClick={onClose} className="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-black active:scale-95 transition-transform">
+                <ArrowLeft size={24} />
+            </button>
+            <h2 className="text-lg font-bold text-black uppercase italic">Product Details</h2>
+        </header>
 
       <div className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar space-y-4">
           <div className="w-full bg-slate-50 rounded-[24px] p-4 flex items-center justify-center border border-slate-100 shadow-inner min-h-[180px]">
@@ -357,19 +353,19 @@ const ProductDetails: React.FC<{
 
                             <button
                                 onClick={() => handleSingleAdd(v)}
-                                disabled={processingIds.has(v.id) || quantities[v.id] === 0}
-                                className={`w-full h-12 rounded-xl text-[10px] font-[1000] uppercase tracking-[0.2em] transition-all italic border-[3px] ${processingIds.has(v.id) ? 'bg-slate-50 text-slate-400 border-slate-100' : 'bg-white text-brand-blue border-brand-blue active:scale-[0.98] shadow-lg shadow-blue-500/5'}`}
+                                disabled={processingIds.has(v.id) || (quantities[v.id] || 0) === 0}
+                                className={`w-full h-12 rounded-xl text-[10px] font-[1000] uppercase tracking-[0.2em] transition-all italic border-[3px] ${processingIds.has(v.id) ? 'bg-slate-50 text-slate-400 border-slate-100' : 'bg-white text-brand-blue border-brand-blue active:scale-[0.98] shadow-lg shadow-blue-500/5 disabled:opacity-40'}`}
                             >
                                 {processingIds.has(v.id) ? 'SYNCING...' : 'ADD TO VAULT'}
                             </button>
                         </div>
-                    ))}
+                    ))}\
                  </div>
               </div>
           </div>
 
           {!loading && (
-              <div className="bg-white p-5 rounded-[36px] border-[6px] border-brand-orange/40 shadow-[0_25px_60px_rgba(0,0,0,0.15)] mt-8">
+              <div className="bg-white p-5 rounded-[36px] border-[6px] border-brand-orange/40 shadow-[0_25px_60px_rgba(0,0,0,0.15)] mt-8 sticky bottom-5">
                   <div className="flex items-center justify-between gap-5">
                     <div className="flex-1">
                         <p className="text-[8px] tracking-[0.4em] text-slate-500 font-[1000] uppercase mb-1 italic leading-none">Valuation Log</p>
@@ -390,6 +386,6 @@ const ProductDetails: React.FC<{
               </div>
           )}
       </div>
-    </motion.div>
+    </div>
   );
 };

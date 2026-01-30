@@ -36,16 +36,26 @@ const App: React.FC = () => {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [rcmCategory, setRcmCategory] = useState<string | null>(null);
   const [hardwareCategory, setHardwareCategory] = useState<string | null>(null);
+  const [isProductDetailOpen, setIsProductDetailOpen] = useState(false);
+  const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
 
   useEffect(() => {
     CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+      if (isProductDetailOpen) {
+        setIsProductDetailOpen(false);
+        return;
+      }
+      if (isOrderDetailOpen) {
+        setIsOrderDetailOpen(false);
+        return;
+      }
       if (activeTab !== 'home') {
         setActiveTab('home');
       } else {
         CapacitorApp.exitApp();
       }
     });
-  }, [activeTab]);
+  }, [activeTab, isProductDetailOpen, isOrderDetailOpen]);
 
   const fetchData = useCallback(async (userId: string) => {
     if (!navigator.onLine || !userId) return;
@@ -161,71 +171,71 @@ const App: React.FC = () => {
     setActiveTab(tab);
   };
 
-  if (showSplash) return <SplashScreen onComplete={() => setShowSplash(false)} />;
-
-  if (!isOnline) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center font-bold">
-        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-600 mb-6">
-           <WifiOff size={40} />
-        </div>
-        <h1 className="text-2xl font-bold text-black uppercase italic mb-2">No Connection</h1>
-        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-8">Please check your internet</p>
-        <button onClick={() => window.location.reload()} className="w-full h-14 bg-black text-white rounded-2xl font-bold uppercase italic">Retry</button>
-      </div>
-    );
-  }
-
-  if (loading) return null;
-
-  if (registeredDealer) {
-    return <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}><RegistrationSuccess dealer={registeredDealer} onComplete={() => { setRegisteredDealer(null); setShowRegistration(false); }} /></Suspense>;
-  }
-
-  if (showRegistration) {
-    return <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}><RegistrationForm 
-      onBack={() => setShowRegistration(false)} 
-      onSuccess={(dealer) => {
-        setRegisteredDealer(dealer);
-      }}
-    /></Suspense>;
-  }
-
-  if (!isLoggedIn || !user) {
-    return (
-      <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}>
-        <LoginView
-          onAuthSuccess={async (userData: any) => {
-            if (!userData) return;
-            setUser(userData);
-            setIsLoggedIn(true);
-            await fetchData(userData.id);
-            setShowWelcome(true);
-          }}
-          onOpenRegistration={() => setShowRegistration(true)}
-          loading={false}
-          setLoading={() => {}}
-        />
-      </Suspense>
-    );
-  }
-
-  // Show a mini loader while switching states after login
-  if (isFetchingData && !user.owner_name) {
-    return (
-        <div className="min-h-screen bg-white flex items-center justify-center">
-            <Loader2 className="animate-spin text-brand-blue" size={40} />
-        </div>
-    );
-  }
-
   const renderContent = () => {
+    if (showSplash) return <SplashScreen onComplete={() => setShowSplash(false)} />;
+
+    if (!isOnline) {
+      return (
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center font-bold">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-600 mb-6">
+             <WifiOff size={40} />
+          </div>
+          <h1 className="text-2xl font-bold text-black uppercase italic mb-2">No Connection</h1>
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-8">Please check your internet</p>
+          <button onClick={() => window.location.reload()} className="w-full h-14 bg-black text-white rounded-2xl font-bold uppercase italic">Retry</button>
+        </div>
+      );
+    }
+  
+    if (loading) return null;
+  
+    if (registeredDealer) {
+      return <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}><RegistrationSuccess dealer={registeredDealer} onComplete={() => { setRegisteredDealer(null); setShowRegistration(false); }} /></Suspense>;
+    }
+  
+    if (showRegistration) {
+      return <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}><RegistrationForm 
+        onBack={() => setShowRegistration(false)} 
+        onSuccess={(dealer) => {
+          setRegisteredDealer(dealer);
+        }}
+      /></Suspense>;
+    }
+  
+    if (!isLoggedIn || !user) {
+      return (
+        <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}>
+          <LoginView
+            onAuthSuccess={async (userData: any) => {
+              if (!userData) return;
+              setUser(userData);
+              setIsLoggedIn(true);
+              await fetchData(userData.id);
+              setShowWelcome(true);
+            }}
+            onOpenRegistration={() => setShowRegistration(true)}
+            loading={false}
+            setLoading={() => {}}
+          />
+        </Suspense>
+      );
+    }
+
+    if (isFetchingData && !user.owner_name) {
+      return (
+          <div className="min-h-screen bg-white flex items-center justify-center">
+              <Loader2 className="animate-spin text-brand-blue" size={40} />
+          </div>
+      );
+    }
+
     if (!user) return null;
+
     switch (activeTab) {
       case 'home': return <HomeView user={user} ledger={ledger} offers={offers} orders={orders} products={products} categories={categories} onNavigate={handleNavigation} companyProfile={companySettings} onSync={() => fetchData(user.id)} />;
-      case 'products': return <ProductView products={products} user={user} onAddToCart={handleAddToCart} onNavigate={handleNavigation} onRefresh={() => fetchData(user.id)} onOpenCart={() => setActiveTab('cart')} selectedProductId={selectedProductId} selectedCategory={hardwareCategory} onSelectCategory={setHardwareCategory} />;
-      case 'rcm_products': return <ProductView products={products} user={user} isRcmMode={true} onAddToCart={handleAddToCart} onNavigate={handleNavigation} onRefresh={() => fetchData(user.id)} onOpenCart={() => setActiveTab('cart')} selectedCategory={rcmCategory} onSelectCategory={setRcmCategory} />;
-      case 'orders': return <OrderManagement orders={orders} onSync={() => fetchData(user.id)} />;
+      case 'products': return <ProductView products={products} user={user} onAddToCart={handleAddToCart} onNavigate={handleNavigation} onRefresh={() => fetchData(user.id)} onOpenCart={() => setActiveTab('cart')} selectedProductId={selectedProductId} selectedCategory={hardwareCategory} onSelectCategory={setHardwareCategory} onDetailToggle={setIsProductDetailOpen} />;
+      case 'rcm_products': return <ProductView products={products} user={user} isRcmMode={true} onAddToCart={handleAddToCart} onNavigate={handleNavigation} onRefresh={() => fetchData(user.id)} onOpenCart={() => setActiveTab('cart')} selectedCategory={rcmCategory} onSelectCategory={setRcmCategory} onDetailToggle={setIsProductDetailOpen} />;
+      case 'orders': return <OrderManagement orders={orders} onSync={() => fetchData(user.id)} onDetailToggle={setIsOrderDetailOpen} />;
       case 'profile': return <ProfileView user={user} onUpdate={setUser} />;
       case 'ledger': return <LedgerView user={user} summary={ledger} isOnline={true} onRefresh={() => fetchData(user.id)} companyProfile={companySettings} />;
       case 'offers': return <OffersView offers={offers} onRefresh={() => fetchData(user.id)} />;
