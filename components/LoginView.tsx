@@ -76,7 +76,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
                       <input
                         type="text"
                         value={dealerCode}
-                        onChange={e => setDealerCode(e.target.value.toUpperCase())}
+                        onChange={e => {
+                            const value = e.target.value.toUpperCase();
+                            if (!value.startsWith('RCM-')) {
+                                setDealerCode('RCM-');
+                            } else {
+                                setDealerCode(value);
+                            }
+                        }}
                         className="w-full h-12 bg-white border border-gray-300 rounded-lg pl-9 pr-4 text-gray-900 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                         placeholder="RCM-XXXX"
                       />
