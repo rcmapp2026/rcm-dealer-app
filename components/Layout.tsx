@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { BottomNav } from './BottomNav';
@@ -17,17 +17,25 @@ interface LayoutProps {
   translations: any;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ 
+export const Layout: React.FC<LayoutProps> = React.memo(({ 
   children, activeTab, onTabChange, onLogout, cartCount, user, notifications, isDarkMode, onToggleDarkMode, translations
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleToggleSidebar = useCallback(() => {
+    setIsSidebarOpen(prev => !prev);
+  }, []);
+
+  const handleCloseSidebar = useCallback(() => {
+    setIsSidebarOpen(false);
+  }, []);
 
   return (
     <div className="flex h-full overflow-hidden bg-white text-black font-sans pt-safe-top">
       
       <Sidebar 
         isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)}
+        onClose={handleCloseSidebar}
         activeTab={activeTab}
         onNavigate={onTabChange}
         onLogout={onLogout}
@@ -41,7 +49,7 @@ export const Layout: React.FC<LayoutProps> = ({
         <Navbar 
           activeTab={activeTab}
           onNavigate={onTabChange}
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          onToggleSidebar={handleToggleSidebar}
           user={user}
           notifications={notifications}
           isDarkMode={false}
@@ -60,4 +68,4 @@ export const Layout: React.FC<LayoutProps> = ({
       </div>
     </div>
   );
-};
+});

@@ -15,7 +15,7 @@ interface NavbarProps {
   translations: any;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ 
+export const Navbar: React.FC<NavbarProps> = React.memo(({ 
   onToggleSidebar, onNavigate, notifications, user, cartCount = 0, translations
 }) => {
   const readIds = JSON.parse(localStorage.getItem('rcm_read_notifications') || '[]');
@@ -65,4 +65,4 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
     </nav>
   );
-};
+});

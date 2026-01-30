@@ -5,7 +5,7 @@ import { motion as m } from 'framer-motion';
 
 const motion = m as any;
 
-export const BottomNav: React.FC<{ activeTab: string; onNavigate: (tab: string) => void; }> = ({ activeTab, onNavigate }) => {
+export const BottomNav: React.FC<{ activeTab: string; onNavigate: (tab: string) => void; }> = React.memo(({ activeTab, onNavigate }) => {
   const navItems = [
     { id: 'home', icon: Home, label: 'HOME' },
     { id: 'rcm_products', icon: Crown, label: 'RCM', isRcm: true },
@@ -47,4 +47,4 @@ export const BottomNav: React.FC<{ activeTab: string; onNavigate: (tab: string) 
       </div>
     </div>
   );
-};
+});

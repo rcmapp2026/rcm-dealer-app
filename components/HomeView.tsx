@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { LedgerSummary, Order, Offer, Product, Category, UserProfile } from '../types';
 import { MapPin, RefreshCw, Database, ShieldCheck, ArrowRight, Clock, CheckCircle, Zap, Award, CreditCard, User } from 'lucide-react';
 import { motion as m } from 'framer-motion';
@@ -21,7 +21,7 @@ interface HomeViewProps {
 }
 
 // Helper to generate a stylish 3D multi-color logo from the first letter
-const BrandLogo = ({ name }: { name: string }) => {
+const BrandLogo = React.memo(({ name }: { name: string }) => {
   const firstLetter = (name || '?').charAt(0).toUpperCase();
 
   const gradients = [
@@ -47,9 +47,9 @@ const BrandLogo = ({ name }: { name: string }) => {
       <div className="absolute -inset-1.5 border border-slate-100 rounded-[22px] -z-10 opacity-50" />
     </div>
   );
-};
+});
 
-export const HomeView: React.FC<HomeViewProps> = ({ user, ledger, onNavigate, products, orders, onSync, companyProfile }) => {
+export const HomeView: React.FC<HomeViewProps> = React.memo(({ user, ledger, onNavigate, products, orders, onSync, companyProfile }) => {
   // Logic: due_amount > 0 means money owed to company (Red). < 0 means Advance (Green).
   const isDue = (ledger?.due_amount || 0) > 0;
 
@@ -74,11 +74,11 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, ledger, onNavigate, pr
     return Array.from(new Set(names)).sort();
   }, [products]);
 
-  const getBrandTextColor = (name: string) => {
+  const getBrandTextColor = useCallback((name: string) => {
     const colors = ['text-brand-orange', 'text-brand-blue', 'text-fuchsia-600', 'text-emerald-600', 'text-indigo-600'];
     const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return colors[hash % colors.length];
-  };
+  }, []);
 
   if (user?.payment_block) {
     return <PaymentBlockedModal supportNumber={companyProfile?.support_number || 'N/A'} user={user} />;
@@ -203,4 +203,4 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, ledger, onNavigate, pr
       </div>
     </div>
   );
-};
+});
