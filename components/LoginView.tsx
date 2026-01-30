@@ -1,6 +1,6 @@
 
 import { motion as m } from 'framer-motion';
-import { ArrowRight, UserPlus, Smartphone, Hash, Sparkles, ShieldCheck } from 'lucide-react';
+import { ArrowRight, UserPlus, Smartphone, Hash, ShieldCheck } from 'lucide-react';
 import React, { useState } from 'react';
 import { RCMLogo } from './RCMLogo';
 import { supabaseService } from '../services/supabaseService';
@@ -8,7 +8,6 @@ import { supabaseService } from '../services/supabaseService';
 const motion = m as any;
 
 interface LoginViewProps {
-  // Fix: Add userData argument to onAuthSuccess to match implementation in App.tsx
   onAuthSuccess: (userData: any) => void;
   onOpenRegistration: () => void;
   loading: boolean;
@@ -30,119 +29,111 @@ export const LoginView: React.FC<LoginViewProps> = ({
     const cleanMobile = mobile.trim();
 
     if (!cleanCode.startsWith('RCM-') || cleanCode.length < 5) {
-      setError('Invalid ID Code. Required: RCM-XXXX');
+      setError('Invalid Dealer ID. Must be in RCM-XXXX format.');
       return;
     }
     if (cleanMobile.length !== 10) {
-      setError('Signal verification failed: Mobile must be 10 digits.');
+      setError('Invalid mobile number. Must be 10 digits.');
       return;
     }
 
     setError('');
     setLoading(true);
     try {
-      // Fix: Capture signed-in user and pass it to onAuthSuccess
       const user = await supabaseService.signIn(cleanCode, cleanMobile);
       onAuthSuccess(user);
     } catch (e: any) {
-      setError(e.message || 'Access Denied. Terminal link rejected.');
+      setError(e.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen h-full w-full flex flex-col bg-white items-center justify-start p-8 pt-10 relative overflow-y-auto font-black">
-       {/* Background Subtle Pattern */}
-       <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-            style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-
-       <div className="w-full max-w-sm flex flex-col items-center relative z-10">
-          <div className="mb-8 active:scale-95 transition-transform duration-300">
-            <RCMLogo size={160} textColor="text-black" showText={false} />
+    <div className="min-h-screen h-full w-full flex flex-col bg-gray-50 items-center justify-center p-6 font-sans">
+       <div className="w-full max-w-sm flex flex-col items-center">
+          <div className="mb-6">
+            <RCMLogo size={100} />
           </div>
 
-          <div className="w-full text-center mb-10">
-            <h1 className="text-[2.6em] font-[1000] text-black italic tracking-tighter leading-[0.8] uppercase">
-              RCM<br/><span className="text-brand-orange">DEALER</span>
-            </h1>
-            <div className="flex items-center justify-center gap-2 mt-4">
-               <div className="h-1 w-8 bg-brand-blue rounded-full" />
-               <p className="text-black text-[10px] font-black uppercase tracking-[0.4em]">Secure Access Point</p>
-               <div className="h-1 w-8 bg-brand-blue rounded-full" />
-            </div>
+          <div className="w-full text-center mb-8">
+            <h1 className="text-2xl font-extrabold text-gray-900">Welcome Back</h1>
+            <p className="text-gray-500 text-sm mt-1">Sign in to your RCM Dealer account.</p>
           </div>
 
-          <div className="w-full space-y-8">
+          <div className="w-full space-y-4">
              {error && (
-               <div className="p-4 bg-rose-100 border-4 border-rose-600 rounded-2xl text-rose-900 text-[10px] font-black text-center uppercase tracking-widest italic animate-shake">
-                 ERROR: {error}
+               <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-xs font-semibold text-center">
+                 {error}
                </div>
              )}
 
-             <div className="space-y-6">
-                <div className="space-y-2">
-                   <label className="text-[10px] font-black text-black uppercase tracking-[0.3em] ml-1">Terminal ID</label>
-                   <div className="relative group">
-                      <Hash className="absolute left-5 top-1/2 -translate-y-1/2 text-[#006666] group-focus-within:text-brand-blue transition-colors" size={18} />
+             <div className="space-y-4">
+                <div>
+                   <label className="text-xs font-medium text-gray-700">Dealer ID</label>
+                   <div className="relative mt-1">
+                      <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                       <input
                         type="text"
                         value={dealerCode}
                         onChange={e => setDealerCode(e.target.value.toUpperCase())}
-                        className="w-full h-16 bg-[#f0fdfa] border-4 border-[#006666] rounded-2xl pl-14 pr-6 text-black text-sm font-black outline-none focus:ring-4 focus:ring-[#006666]/20 transition-all shadow-sm uppercase italic placeholder:text-slate-600"
+                        className="w-full h-12 bg-white border border-gray-300 rounded-lg pl-9 pr-4 text-gray-900 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                         placeholder="RCM-XXXX"
                       />
                    </div>
                 </div>
 
-                <div className="space-y-2">
-                   <label className="text-[10px] font-black text-black uppercase tracking-[0.3em] ml-1">Verified Mobile</label>
-                   <div className="relative group">
-                      <Smartphone className="absolute left-5 top-1/2 -translate-y-1/2 text-[#006666] group-focus-within:text-brand-orange transition-colors" size={18} />
+                <div>
+                   <label className="text-xs font-medium text-gray-700">Registered Mobile</label>
+                   <div className="relative mt-1">
+                      <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                       <input
                         type="tel"
                         maxLength={10}
                         value={mobile}
                         onChange={e => setMobile(e.target.value.replace(/\D/g, ''))}
-                        className="w-full h-16 bg-[#f0fdfa] border-4 border-[#006666] rounded-2xl pl-14 pr-6 text-black text-sm font-black outline-none focus:ring-4 focus:ring-[#006666]/20 transition-all shadow-sm italic placeholder:text-slate-600"
-                        placeholder="9876543210"
+                        className="w-full h-12 bg-white border border-gray-300 rounded-lg pl-9 pr-4 text-gray-900 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="10-digit mobile number"
                       />
                    </div>
                 </div>
 
-                <div className="flex flex-col items-center gap-6 pt-4">
+                <div className="pt-2">
                     <button
                       onClick={handleLogin}
                       disabled={loading}
-                      className="w-full h-20 bg-brand-orange text-black text-xs font-[1000] uppercase tracking-[0.4em] rounded-[28px] active:scale-[0.97] transition-all flex items-center justify-center gap-4 disabled:opacity-50 shadow-2xl py-6 italic border-4 border-black"
+                      className="w-full h-12 bg-gray-900 text-white text-sm font-bold rounded-lg active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60 shadow-md"
                     >
                        {loading ? (
-                         <div className="flex items-center gap-3">
-                           <div className="w-5 h-5 border-4 border-black/30 border-t-black rounded-full animate-spin" />
-                           <span className="text-black">BOOTING...</span>
-                         </div>
+                         <>
+                           <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                           <span>Authenticating...</span>
+                         </>
                        ) : (
                          <>
-                           INITIALIZE COMMAND
-                           <ArrowRight size={22} strokeWidth={4} className="text-black"/>
+                           Sign In
+                           <ArrowRight size={16} strokeWidth={3} />
                          </>
                        )}
                     </button>
-
-                    <button
-                       onClick={onOpenRegistration}
-                       className="flex items-center gap-3 text-black hover:text-brand-blue transition-colors uppercase font-black text-[11px] tracking-[0.2em] mt-2 underline underline-offset-8 decoration-2"
-                    >
-                       <UserPlus size={14} strokeWidth={4} className="text-[#006666]"/> NEW TERMINAL? REGISTER
-                    </button>
                 </div>
              </div>
+
+            <div className="text-center mt-4">
+              <button
+                  onClick={onOpenRegistration}
+                  className="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors font-semibold text-xs group"
+              >
+                  <UserPlus size={14} className="text-gray-400 group-hover:text-blue-500" />
+                  New Dealer? Register Here
+              </button>
+            </div>
           </div>
        </div>
 
-       <div className="mt-auto pt-10 flex items-center gap-2">
-          <ShieldCheck size={14} className="text-[#006666]" />
-          <span className="text-[10px] tracking-[0.5em] uppercase font-black text-black">Powered by RCM Technology</span>
+       <div className="absolute bottom-6 flex items-center gap-2 opacity-60">
+          <ShieldCheck size={12} className="text-gray-500" />
+          <span className="text-xs text-gray-500">Powered by RCM Technology</span>
        </div>
     </div>
   );
