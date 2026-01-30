@@ -1,7 +1,7 @@
 
 import { motion as m, AnimatePresence } from 'framer-motion';
 import { Box, Check, Hash, Loader2, Minus, Plus, RefreshCw, ShoppingBag, ShoppingCart, X } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { supabaseService } from '../services/supabaseService';
 import { Product, UserProfile } from '../types';
@@ -15,6 +15,10 @@ interface ProductViewProps {
   onAddToCart: (p: Product, qty: number, variantId?: string, price?: number) => void | Promise<void>;
   onOpenCart?: () => void;
   onRefresh?: () => void;
+  selectedProductId?: string | null;
+  onNavigate: (tab: string, filterValue?: any) => void;
+  selectedCategory: string | null;
+  onSelectCategory: (category: string | null) => void;
 }
 
 export const ProductView: React.FC<ProductViewProps> = ({
@@ -23,13 +27,18 @@ export const ProductView: React.FC<ProductViewProps> = ({
   isRcmMode = false,
   onAddToCart,
   onOpenCart,
-  onRefresh
+  onRefresh,
+  selectedProductId,
+  onNavigate,
+  selectedCategory,
+  onSelectCategory
 }) => {
   const [internalProducts, setInternalProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [addingId, setAddingId] = useState<string | null>(null);
+  const productRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
     if (propsProducts && propsProducts.length > 0) {
@@ -49,6 +58,15 @@ export const ProductView: React.FC<ProductViewProps> = ({
       setInternalProducts([]);
     }
   }, [propsProducts, user, isRcmMode]);
+
+  useEffect(() => {
+    if (selectedProductId && productRefs.current[selectedProductId]) {
+      productRefs.current[selectedProductId]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [selectedProductId]);
 
   const categories = useMemo(() => {
     return Array.from(new Set(internalProducts.map(p => p.category)))
@@ -75,6 +93,18 @@ export const ProductView: React.FC<ProductViewProps> = ({
     setTimeout(() => setAddingId(null), 800);
   };
 
+  const handleProductSelect = (product: Product) => {
+    setScrollPosition(window.scrollY);
+    setSelectedProduct(product);
+  };
+
+  const handleProductDeselect = () => {
+    setSelectedProduct(null);
+    setTimeout(() => {
+        window.scrollTo({ top: scrollPosition, behavior: 'auto' });
+    }, 0);
+  };
+
   return (
     <div className="bg-white min-h-screen pb-40 font-black">
       <div className="sticky top-0 z-40 bg-white border-b border-slate-100 px-3 py-2 space-y-2 shadow-sm">
@@ -98,7 +128,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
 
         <div className="flex gap-1 overflow-x-auto no-scrollbar pb-1">
             <button
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => onSelectCategory(null)}
                 className={`px-3 py-1 rounded-md text-[7px] tracking-widest border transition-all font-[1000] uppercase italic whitespace-nowrap ${!selectedCategory ? 'bg-brand-blue text-white border-brand-blue' : 'bg-white text-black border-slate-100'}`}
             >
                 ALL ASSETS
@@ -106,7 +136,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
             {categories.map(cat => (
                 <button
                   key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => onSelectCategory(cat)}
                   className={`px-3 py-1 rounded-md text-[7px] tracking-widest border whitespace-nowrap transition-all font-[1000] uppercase italic ${selectedCategory === cat ? 'bg-brand-blue text-white border-brand-blue' : 'bg-white text-black border-slate-100'}`}
                 >
                   {cat}
@@ -118,9 +148,10 @@ export const ProductView: React.FC<ProductViewProps> = ({
       <div className="px-3 py-3 grid grid-cols-1 gap-2">
         {filteredProducts.length > 0 ? filteredProducts.map(p => (
           <motion.div
+            ref={el => productRefs.current[p.id] = el}
             whileTap={{ scale: 0.98 }}
             key={p.id}
-            onClick={() => setSelectedProduct(p)}
+            onClick={() => handleProductSelect(p)}
             className="p-2 bg-white border border-slate-100 rounded-xl flex items-center gap-3 active:bg-slate-50 transition-all shadow-sm"
           >
              <div className="w-20 h-20 bg-slate-50 rounded-lg flex items-center justify-center p-1.5 overflow-hidden shrink-0">
@@ -163,7 +194,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
         {selectedProduct && (
           <ProductDetails
             product={selectedProduct}
-            onClose={() => setSelectedProduct(null)}
+            onClose={handleProductDeselect}
             onAddToCart={onAddToCart}
             onOpenCart={onOpenCart}
           />

@@ -32,6 +32,9 @@ const App: React.FC = () => {
   const [showRegistration, setShowRegistration] = useState(false);
   const [registeredDealer, setRegisteredDealer] = useState<UserProfile | null>(null);
   const [isFetchingData, setIsFetchingData] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [rcmCategory, setRcmCategory] = useState<string | null>(null);
+  const [hardwareCategory, setHardwareCategory] = useState<string | null>(null);
 
   const fetchData = useCallback(async (userId: string) => {
     if (!navigator.onLine || !userId) return;
@@ -140,6 +143,13 @@ const App: React.FC = () => {
     }
   };
 
+  const handleNavigation = (tab: string, filterValue?: any) => {
+    if (tab === 'products' && typeof filterValue === 'object' && filterValue.productId) {
+      setSelectedProductId(filterValue.productId);
+    }
+    setActiveTab(tab);
+  };
+
   if (showSplash) return <SplashScreen onComplete={() => setShowSplash(false)} />;
 
   if (!isOnline) {
@@ -201,9 +211,9 @@ const App: React.FC = () => {
   const renderContent = () => {
     if (!user) return null;
     switch (activeTab) {
-      case 'home': return <HomeView user={user} ledger={ledger} offers={offers} orders={orders} products={products} categories={categories} onNavigate={setActiveTab} companyProfile={companySettings} onSync={() => fetchData(user.id)} />;
-      case 'products': return <ProductView products={products} user={user} onAddToCart={handleAddToCart} onNavigate={setActiveTab} onRefresh={() => fetchData(user.id)} onOpenCart={() => setActiveTab('cart')} />;
-      case 'rcm_products': return <ProductView products={products} user={user} isRcmMode={true} onAddToCart={handleAddToCart} onNavigate={setActiveTab} onRefresh={() => fetchData(user.id)} onOpenCart={() => setActiveTab('cart')} />;
+      case 'home': return <HomeView user={user} ledger={ledger} offers={offers} orders={orders} products={products} categories={categories} onNavigate={handleNavigation} companyProfile={companySettings} onSync={() => fetchData(user.id)} />;
+      case 'products': return <ProductView products={products} user={user} onAddToCart={handleAddToCart} onNavigate={handleNavigation} onRefresh={() => fetchData(user.id)} onOpenCart={() => setActiveTab('cart')} selectedProductId={selectedProductId} selectedCategory={hardwareCategory} onSelectCategory={setHardwareCategory} />;
+      case 'rcm_products': return <ProductView products={products} user={user} isRcmMode={true} onAddToCart={handleAddToCart} onNavigate={handleNavigation} onRefresh={() => fetchData(user.id)} onOpenCart={() => setActiveTab('cart')} selectedCategory={rcmCategory} onSelectCategory={setRcmCategory} />;
       case 'orders': return <OrderManagement orders={orders} onSync={() => fetchData(user.id)} />;
       case 'profile': return <ProfileView user={user} onUpdate={setUser} />;
       case 'ledger': return <LedgerView user={user} summary={ledger} isOnline={true} onRefresh={() => fetchData(user.id)} companyProfile={companySettings} />;
@@ -211,7 +221,7 @@ const App: React.FC = () => {
       case 'support': return <SupportView user={user} />;
       case 'notifications': return <NotificationView notifications={notifications} onMarkRead={() => {}} onRefresh={() => fetchData(user.id)} />;
       case 'cart': return <CartView user={user} cartItemsProps={cartItems} onOrderPlaced={() => { fetchData(user.id); setActiveTab('orders'); }} isOnline={true} onRefresh={() => fetchData(user.id)} companyProfile={companySettings} />;
-      default: return <HomeView user={user} ledger={ledger} offers={offers} orders={orders} products={products} categories={categories} onNavigate={setActiveTab} companyProfile={companySettings} onSync={() => fetchData(user.id)} />;
+      default: return <HomeView user={user} ledger={ledger} offers={offers} orders={orders} products={products} categories={categories} onNavigate={handleNavigation} companyProfile={companySettings} onSync={() => fetchData(user.id)} />;
     }
   };
 

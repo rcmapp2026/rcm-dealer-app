@@ -15,7 +15,7 @@ interface HomeViewProps {
   orders: Order[];
   products: Product[];
   categories: Category[];
-  onNavigate: (tab: string, filterValue?: string) => void;
+  onNavigate: (tab: string, filterValue?: any) => void;
   onSync?: () => void;
   companyProfile: any;
 }
@@ -184,7 +184,7 @@ export const HomeView: React.FC<HomeViewProps> = React.memo(({ user, ledger, onN
            {recentProducts.map((p) => (
               <div
                 key={p.id}
-                onClick={() => onNavigate('products')}
+                onClick={() => onNavigate('products', { productId: p.id })}
                 className="bg-white p-5 rounded-[36px] border-[3px] border-slate-50 space-y-4 shadow-sm active:scale-95 transition-all"
               >
                  <div className="aspect-square bg-slate-50 rounded-[24px] p-4 flex items-center justify-center overflow-hidden border border-slate-100 shadow-inner">
