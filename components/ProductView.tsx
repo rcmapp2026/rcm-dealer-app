@@ -12,7 +12,7 @@ interface ProductViewProps {
   products: Product[];
   user?: UserProfile;
   isRcmMode?: boolean;
-  onAddToCart: (p: Product, qty: number, variantId?: string, price?: number) => void | Promise<void>;
+  onAddToCart: (p: Product, qty: number, variantId?: string, price?: number, company?: string) => void | Promise<void>;
   onOpenCart?: () => void;
   onRefresh?: () => void;
   selectedProductId?: string | null;
@@ -90,7 +90,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
     e.stopPropagation();
     if (addingId) return;
     setAddingId(p.id);
-    await onAddToCart(p, 1, p.id, p.selling_price || 0);
+    await onAddToCart(p, 1, p.id, p.selling_price || 0, p.company);
     setTimeout(() => setAddingId(null), 800);
   };
 
@@ -206,7 +206,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
 const ProductDetails: React.FC<{
   product: Product;
   onClose: () => void;
-  onAddToCart: (p: Product, qty: number, variantId?: string, price?: number) => void | Promise<void>;
+  onAddToCart: (p: Product, qty: number, variantId?: string, price?: number, company?: string) => void | Promise<void>;
   onOpenCart?: () => void;
 }> = ({ product, onClose, onAddToCart, onOpenCart }) => {
   const [variants, setVariants] = useState<Product[]>([]);
@@ -265,7 +265,7 @@ const ProductDetails: React.FC<{
     for (const v of variants) {
         const q = Number(quantities[v.id]) || 0;
         if (q > 0) {
-            await onAddToCart(v, q, v.id, v.selling_price || 0);
+            await onAddToCart(v, q, v.id, v.selling_price || 0, v.company);
             anyAdded = true;
         }
     }
@@ -281,7 +281,7 @@ const ProductDetails: React.FC<{
     if (q > 0) {
         setProcessingIds(prev => new Set(prev).add(v.id));
         try {
-            await onAddToCart(v, q, v.id, v.selling_price || 0);
+            await onAddToCart(v, q, v.id, v.selling_price || 0, v.company);
         } finally {
             setProcessingIds(prev => {
                 const next = new Set(prev);

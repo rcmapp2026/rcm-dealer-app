@@ -154,10 +154,10 @@ const App: React.FC = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [companySettings, setCompanySettings] = useState<any>(null);
 
-  const handleAddToCart = async (p: Product, qty: number, variantId?: string) => {
+  const handleAddToCart = async (p: Product, qty: number, variantId?: string, price?: number, company?: string) => {
     if (!user) return;
     const vId = variantId || p.product_id || p.id;
-    const success = await supabaseService.manageCartItem(user.id, p.product_id || p.id, vId, qty);
+    const success = await supabaseService.manageCartItem(user.id, p.product_id || p.id, vId, qty, company || p.company || 'GENUINE RCM');
     if (success) {
       const updatedCart = await supabaseService.fetchCart(user.id);
       setCartItems(updatedCart || []);
@@ -233,7 +233,7 @@ const App: React.FC = () => {
       case 'offers': return <OffersView offers={offers} onRefresh={() => fetchData(user.id)} />;
       case 'support': return <SupportView user={user} />;
       case 'notifications': return <NotificationView notifications={notifications} onMarkRead={() => {}} onRefresh={() => fetchData(user.id)} />;
-      case 'cart': return <CartView user={user} cartItemsProps={cartItems} onOrderPlaced={() => { fetchData(user.id); setActiveTab('orders'); }} isOnline={true} onRefresh={() => fetchData(user.id)} companyProfile={companySettings} onClose={() => setActiveTab('home')} />;
+      case 'cart': return <CartView user={user} cartItemsProps={cartItems} products={products} onOrderPlaced={() => { fetchData(user.id); setActiveTab('orders'); }} isOnline={true} onRefresh={() => fetchData(user.id)} companyProfile={companySettings} onClose={() => setActiveTab('home')} />;
       default: return <HomeView user={user} ledger={ledger} offers={offers} orders={orders} products={products} categories={categories} onNavigate={handleNavigation} companyProfile={companySettings} onSync={() => fetchData(user.id)} />;
     }
   };

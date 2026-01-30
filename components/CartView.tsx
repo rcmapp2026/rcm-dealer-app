@@ -4,7 +4,7 @@ import { ArrowRight, CreditCard, Loader2, Minus, Plus, ShoppingBag, Trash2, Shie
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { supabaseService } from '../services/supabaseService';
-import { Order, UserProfile } from '../types';
+import { Order, UserProfile, Product } from '../types';
 import { OrderSuccess } from './OrderSuccess';
 import toast from 'react-hot-toast';
 
@@ -13,6 +13,7 @@ const motion = m as any;
 interface CartViewProps {
   user: UserProfile;
   cartItemsProps: any[];
+  products: Product[];
   onOrderPlaced: () => void;
   isOnline: boolean;
   onRefresh?: () => void;
@@ -21,7 +22,7 @@ interface CartViewProps {
 }
 
 export const CartView: React.FC<CartViewProps> = ({
-  user, cartItemsProps, onOrderPlaced, onRefresh, onClose
+  user, cartItemsProps, products, onOrderPlaced, onRefresh, onClose
 }) => {
   const [placingOrder, setPlacingOrder] = useState(false);
   const [successOrder, setSuccessOrder] = useState<Order | null>(null);
@@ -35,11 +36,11 @@ export const CartView: React.FC<CartViewProps> = ({
 
   const cartItemsList = useMemo(() => {
     return (cartItemsProps || []).map((item: any) => {
-        const productInfo = item.products;
+        const productInfo = products.find(p => p.id === item.product_id);
         const variantInfo = item.product_variants;
-        const companyName = productInfo?.company || 'GENUINE RCM';
+        const companyName = productInfo?.company || variantInfo?.company || 'GENUINE RCM';
 
-        return {
+      return {
             id: item.id,
             dealer_id: user.id,
             product_id: item.product_id,
@@ -52,12 +53,13 @@ export const CartView: React.FC<CartViewProps> = ({
             image: productInfo?.image_url || PLACEHOLDER_IMAGE,
         };
     }).filter(i => i.qty > 0);
-  }, [cartItemsProps, user.id]);
+  }, [cartItemsProps, products, user.id]);
 
   const subtotal = useMemo(() => cartItemsList.reduce((sum, item) => sum + (item.price * item.qty), 0), [cartItemsList]);
 
   const handleUpdateQty = async (productId: string, variantId: string, delta: number) => {
-    const success = await supabaseService.manageCartItem(user.id, productId, variantId, delta);
+    const item = cartItemsList.find(i => i.product_id === productId && i.variant_id === variantId);
+    const success = await supabaseService.manageCartItem(user.id, productId, variantId, delta, item?.company);
     if (success && onRefresh) onRefresh();
   };
 
@@ -138,6 +140,7 @@ export const CartView: React.FC<CartViewProps> = ({
                    </div>
                    <div className="flex-1 min-w-0">
                       <h4 className="text-[12px] text-black font-[1000] uppercase italic truncate leading-tight tracking-tight">{item.name}</h4>
+                      <p className="text-[9px] text-slate-500 font-black uppercase italic mt-0.5">{item.company}</p>
                       <p className="text-[9px] text-brand-blue font-black uppercase italic mt-0.5">SIZE: {item.size}</p>
 
                       <div className="flex items-center justify-between mt-1">
