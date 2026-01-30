@@ -23,7 +23,7 @@ export const Layout: React.FC<LayoutProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-full overflow-hidden bg-white text-black font-sans">
+    <div className="flex h-full overflow-hidden bg-white text-black font-sans pt-safe-top">
       
       <Sidebar 
         isOpen={isSidebarOpen} 
