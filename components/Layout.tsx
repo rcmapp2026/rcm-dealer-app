@@ -2,12 +2,12 @@ import React, { useState, useCallback } from 'react';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { BottomNav } from './BottomNav';
-import { UserProfile, AppNotification } from '../types';
+import { UserProfile, AppNotification, Product } from '../types';
 
 interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
-  onTabChange: (tab: string) => void;
+  onTabChange: (tab: string, filter?: any) => void;
   onLogout: () => void;
   cartCount: number;
   user: UserProfile | null;
@@ -15,10 +15,11 @@ interface LayoutProps {
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   translations: any;
+  products?: Product[];
 }
 
 export const Layout: React.FC<LayoutProps> = React.memo(({ 
-  children, activeTab, onTabChange, onLogout, cartCount, user, notifications, isDarkMode, onToggleDarkMode, translations
+  children, activeTab, onTabChange, onLogout, cartCount, user, notifications, isDarkMode, onToggleDarkMode, translations, products = []
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -42,6 +43,7 @@ export const Layout: React.FC<LayoutProps> = React.memo(({
         user={user}
         cartCount={cartCount}
         translations={translations}
+        products={products}
       />
 
       <div className="flex-1 flex flex-col min-w-0 lg:ml-72 transition-all duration-300 h-full relative bg-white">

@@ -39,6 +39,8 @@ public class MainActivity extends BridgeActivity {
                     @Override
                     public void onAnimationEnd(android.animation.Animator animation) {
                         splashScreenView.remove();
+                        // Show the notification popup
+                        NotificationPopup.show(MainActivity.this, "offer1", "Latest Offer!", "Here is the latest message about our new offer. Check it out now!");
                     }
                 }
             );

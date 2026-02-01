@@ -19,6 +19,8 @@ interface ProductViewProps {
   onNavigate: (tab: string, filterValue?: any) => void;
   selectedCategory: string | null;
   onSelectCategory: (category: string | null) => void;
+  selectedCompany?: string | null;
+  onSelectCompany?: (company: string | null) => void;
   onDetailToggle: (isOpen: boolean) => void;
 }
 
@@ -33,6 +35,8 @@ export const ProductView: React.FC<ProductViewProps> = ({
   onNavigate,
   selectedCategory,
   onSelectCategory,
+  selectedCompany,
+  onSelectCompany,
   onDetailToggle
 }) => {
   const [internalProducts, setInternalProducts] = useState<Product[]>([]);
@@ -82,9 +86,10 @@ export const ProductView: React.FC<ProductViewProps> = ({
                        (p.variant_name || "").toLowerCase().includes(sTerm) ||
                        (p.sku_code || "").toLowerCase().includes(sTerm);
       const catChipMatch = selectedCategory ? p.category === selectedCategory : true;
-      return nameMatch && catChipMatch;
+      const companyMatch = selectedCompany ? p.company === selectedCompany : true;
+      return nameMatch && catChipMatch && companyMatch;
     });
-  }, [internalProducts, search, selectedCategory]);
+  }, [internalProducts, search, selectedCategory, selectedCompany]);
 
   const handleQuickAdd = async (e: React.MouseEvent, p: Product) => {
     e.stopPropagation();
@@ -124,7 +129,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={isRcmMode ? "Search RCM..." : "Search Hardware..."}
+              placeholder={isRcmMode ? "Search RCM..." : "Search Assets..."}
               className="w-full h-9 bg-slate-50 border border-slate-200 rounded-lg px-3 text-[10px] text-slate-900 outline-none focus:border-brand-blue font-black uppercase italic"
             />
           </div>
@@ -138,11 +143,21 @@ export const ProductView: React.FC<ProductViewProps> = ({
 
         <div className="flex gap-1 overflow-x-auto no-scrollbar pb-1">
             <button
-                onClick={() => onSelectCategory(null)}
-                className={`px-3 py-1 rounded-md text-[7px] tracking-widest border transition-all font-[1000] uppercase italic whitespace-nowrap ${!selectedCategory ? 'bg-brand-blue text-white border-brand-blue' : 'bg-white text-black border-slate-100'}`}
+                onClick={() => {
+                    onSelectCategory(null);
+                    if (onSelectCompany) onSelectCompany(null);
+                }}
+                className={`px-3 py-1 rounded-md text-[7px] tracking-widest border transition-all font-[1000] uppercase italic whitespace-nowrap ${(!selectedCategory && !selectedCompany) ? 'bg-brand-blue text-white border-brand-blue' : 'bg-white text-black border-slate-100'}`}
             >
                 ALL ASSETS
             </button>
+            {selectedCompany && (
+                <button
+                    className="px-3 py-1 rounded-md text-[7px] tracking-widest border whitespace-nowrap bg-orange-500 text-white border-orange-500 font-[1000] uppercase italic"
+                >
+                    BRAND: {selectedCompany}
+                </button>
+            )}
             {categories.map(cat => (
                 <button
                   key={cat}
