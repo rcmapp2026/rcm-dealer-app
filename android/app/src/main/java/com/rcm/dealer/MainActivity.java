@@ -59,6 +59,11 @@ public class MainActivity extends BridgeActivity {
             webSettings.setAllowFileAccess(true);
             webSettings.setAllowContentAccess(true);
             
+            // Performance improvements
+            webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+            webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+            webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            
             // Set dark background to prevent white flicker
             webView.setBackgroundColor(Color.parseColor("#020617"));
             
@@ -76,5 +81,14 @@ public class MainActivity extends BridgeActivity {
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
         controller.setAppearanceLightStatusBars(false);
         controller.setAppearanceLightNavigationBars(false);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (this.bridge != null && this.bridge.getWebView() != null && this.bridge.getWebView().canGoBack()) {
+            this.bridge.getWebView().goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
 }
