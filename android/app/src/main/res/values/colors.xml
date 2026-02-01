@@ -2,6 +2,6 @@
 <resources>
     <color name="colorPrimary">#020617</color>
     <color name="colorPrimaryDark">#020617</color>
-    <color name="rcm_bg">#020617</color>
-    <color name="windowBackground">#020617</color>
+    <color name="rcm_bg">#FFFFFF</color>
+    <color name="windowBackground">#FFFFFF</color>
 </resources>

@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AnticipateInterpolator;
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -64,31 +65,38 @@ public class MainActivity extends BridgeActivity {
             webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
             webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             
-            // Set dark background to prevent white flicker
-            webView.setBackgroundColor(Color.parseColor("#020617"));
+            // Set background to white
+            webView.setBackgroundColor(Color.WHITE);
+
+            // App size reduction (Text zoom 98% for "1 point" feel)
+            webSettings.setTextZoom(98);
             
             // Enable debugging
             WebView.setWebContentsDebuggingEnabled(true);
         }
 
+        // Handle Back Button
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (bridge != null && bridge.getWebView() != null && bridge.getWebView().canGoBack()) {
+                    bridge.getWebView().goBack();
+                } else {
+                    setEnabled(false);
+                    onBackPressed();
+                }
+            }
+        });
+
         // Configure Status Bar and System UI
         Window window = getWindow();
         WindowCompat.setDecorFitsSystemWindows(window, false);
         window.setStatusBarColor(Color.TRANSPARENT);
-        window.setNavigationBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.WHITE);
 
-        // Set status bar icons to light (since background is dark navy)
+        // Set status bar icons to dark (since background is white)
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
-        controller.setAppearanceLightStatusBars(false);
-        controller.setAppearanceLightNavigationBars(false);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (this.bridge != null && this.bridge.getWebView() != null && this.bridge.getWebView().canGoBack()) {
-            this.bridge.getWebView().goBack();
-        } else {
-            super.onBackPressed();
-        }
+        controller.setAppearanceLightStatusBars(true);
+        controller.setAppearanceLightNavigationBars(true);
     }
 }
