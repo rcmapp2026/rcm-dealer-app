@@ -48,23 +48,20 @@ const SidebarLink = memo(({ item, active, onNavigate, onClose }: any) => {
         onNavigate(item.id);
         onClose();
       }}
-      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-300 group relative overflow-hidden
+      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-200 group relative overflow-hidden
         ${active
           ? 'bg-black text-white shadow-xl scale-[1.02]'
           : 'text-slate-600 hover:bg-slate-50'
         }`}
     >
-      <div className={`transition-all duration-500 p-2 rounded-xl group-active:scale-90
+      <div className={`transition-all duration-300 p-2 rounded-xl group-active:scale-90
         ${active ? 'bg-white/10 text-white' : `bg-white shadow-sm border border-slate-100 ${item.color}`}`}>
         <Icon size={18} strokeWidth={2.5} />
       </div>
       <span className="text-[11px] font-black uppercase tracking-wider flex-1 text-left italic">{item.label}</span>
 
       {active && (
-        <motion.div
-            layoutId="activeGlow"
-            className="absolute right-2 w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_10px_#f97316]"
-        />
+        <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_10px_#f97316]" />
       )}
     </button>
   );
@@ -166,13 +163,14 @@ export const Sidebar: React.FC<SidebarProps> = memo(({
   return (
     <>
       <div className="hidden lg:block w-72 h-screen fixed left-0 top-0 z-50 border-r border-slate-100 shadow-sm">{SidebarContent}</div>
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {isOpen && (
           <div key="sidebar-overlay" className="lg:hidden fixed inset-0 z-[60]">
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                transition={{ duration: 0.1 }}
                 onClick={onClose}
                 className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
@@ -180,7 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = memo(({
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
-                transition={{ type: 'tween', duration: 0.3, ease: 'circOut' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 350 }}
                 className="absolute left-0 top-0 bottom-0 w-80 shadow-2xl overflow-hidden rounded-r-[40px] bg-white border-r border-slate-100"
             >
               {SidebarContent}
