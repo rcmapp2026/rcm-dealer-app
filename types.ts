@@ -63,6 +63,7 @@ export interface Product {
   variant_name: string | null;
   sku_code: string | null; 
   unit: string | null; 
+  created_at?: string;
 }
 
 export interface CartItem {

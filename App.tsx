@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { SplashScreen } from './components/SplashScreen';
 import { WelcomeOverlay } from './components/WelcomeOverlay';
@@ -22,43 +22,48 @@ const CartView = lazy(() => import('./components/CartView').then(m => ({ default
 const RegistrationForm = lazy(() => import('./components/RegistrationForm').then(m => ({ default: m.RegistrationForm })));
 const RegistrationSuccess = lazy(() => import('./components/RegistrationSuccess').then(m => ({ default: m.RegistrationSuccess })));
 
-// Integrated CompanyView Component to avoid import resolution issues
+const getUniqueColor = (text: string) => {
+  const colors = [
+    'text-blue-600', 'text-rose-600', 'text-amber-600', 'text-emerald-600',
+    'text-indigo-600', 'text-orange-600', 'text-cyan-600', 'text-violet-600',
+    'text-fuchsia-600', 'text-teal-600', 'text-pink-600', 'text-sky-600',
+    'text-lime-600', 'text-red-600', 'text-purple-600', 'text-yellow-600',
+    'text-slate-700', 'text-zinc-800', 'text-orange-700', 'text-cyan-800'
+  ];
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    hash = text.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
 const OurPartnersView: React.FC<{ companies: Company[], products: Product[], onSelect: (name: string) => void }> = ({ companies, products, onSelect }) => {
   const getCount = (compName: string) => products.filter(p => p.company === compName).length;
-  const getGradient = (name: string) => {
-    const gradients = ['from-blue-500 to-indigo-600', 'from-rose-500 to-orange-500', 'from-emerald-500 to-teal-600', 'from-amber-500 to-orange-600', 'from-violet-500 to-purple-600'];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    return gradients[Math.abs(hash) % gradients.length];
-  };
 
   return (
-    <div className="bg-slate-50 min-h-screen p-6 pb-40 space-y-8">
+    <div className="bg-white min-h-screen p-6 pb-40 space-y-8">
         <div className="flex flex-col gap-1">
           <p className="text-blue-600 text-[10px] font-black uppercase tracking-[0.4em] italic">Official Network</p>
           <h1 className="text-3xl font-[1000] text-black tracking-tight uppercase italic leading-tight">Our <span className="text-orange-500">Partners</span></h1>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-            {companies.map(comp => (
+        <div className="grid grid-cols-2 gap-4">
+            {companies.map((comp, idx) => (
                 <motion.div
                     key={comp.id}
-                    whileTap={{ scale: 0.97 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: idx * 0.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => onSelect(comp.name)}
-                    className="p-5 bg-white rounded-[32px] border border-slate-100 flex items-center gap-5 shadow-sm active:bg-slate-50 transition-all group"
+                    className="p-4 bg-white rounded-[28px] border border-slate-100 flex flex-col items-center gap-3 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.1)] active:bg-slate-50 transition-all group"
                 >
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getGradient(comp.name)} flex items-center justify-center shadow-lg shrink-0 group-hover:rotate-3 transition-transform`}>
-                        <span className="text-2xl font-black text-white italic drop-shadow-md">{comp.name.charAt(0).toUpperCase()}</span>
+                    <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100 shadow-inner group-hover:scale-110 transition-transform">
+                        <span className={`text-2xl font-black italic ${getUniqueColor(comp.name)}`}>{comp.name.charAt(0).toUpperCase()}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-black text-black uppercase italic tracking-tight truncate">{comp.name}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="bg-blue-50 text-blue-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">{getCount(comp.name)} Assets</span>
-                            <span className="text-slate-300 text-[8px] font-bold uppercase tracking-widest">Verified Partner</span>
-                        </div>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-black group-hover:text-white transition-all">
-                        <ChevronRight size={20} strokeWidth={3} />
+                    <div className="text-center w-full">
+                        <h3 className={`text-[11px] font-black uppercase italic tracking-tight truncate ${getUniqueColor(comp.name)}`}>{comp.name}</h3>
+                        <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1">{getCount(comp.name)} ASSETS</p>
                     </div>
                 </motion.div>
             ))}
@@ -69,6 +74,7 @@ const OurPartnersView: React.FC<{ companies: Company[], products: Product[], onS
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
+  const [tabHistory, setTabHistory] = useState<string[]>(['home']);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -98,23 +104,46 @@ const App: React.FC = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [companySettings, setCompanySettings] = useState<any>(null);
 
+  // Use refs to access latest state in the back button listener
+  const activeTabRef = useRef(activeTab);
+  const tabHistoryRef = useRef(tabHistory);
+  const isProductDetailOpenRef = useRef(isProductDetailOpen);
+  const isOrderDetailOpenRef = useRef(isOrderDetailOpen);
+
+  useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
+  useEffect(() => { tabHistoryRef.current = tabHistory; }, [tabHistory]);
+  useEffect(() => { isProductDetailOpenRef.current = isProductDetailOpen; }, [isProductDetailOpen]);
+  useEffect(() => { isOrderDetailOpenRef.current = isOrderDetailOpen; }, [isOrderDetailOpen]);
+
   useEffect(() => {
-    CapacitorApp.addListener('backButton', ({ canGoBack }) => {
-      if (isProductDetailOpen) {
+    const backListener = CapacitorApp.addListener('backButton', () => {
+      if (isProductDetailOpenRef.current) {
         setIsProductDetailOpen(false);
         return;
       }
-      if (isOrderDetailOpen) {
+      if (isOrderDetailOpenRef.current) {
         setIsOrderDetailOpen(false);
         return;
       }
-      if (activeTab !== 'home') {
+
+      if (tabHistoryRef.current.length > 1) {
+        const newHistory = [...tabHistoryRef.current];
+        newHistory.pop(); // Remove current tab
+        const prevTab = newHistory[newHistory.length - 1];
+        setTabHistory(newHistory);
+        setActiveTab(prevTab);
+      } else if (activeTabRef.current !== 'home') {
         setActiveTab('home');
+        setTabHistory(['home']);
       } else {
         CapacitorApp.exitApp();
       }
     });
-  }, [activeTab, isProductDetailOpen, isOrderDetailOpen]);
+
+    return () => {
+      backListener.then(h => h.remove());
+    };
+  }, []);
 
   const fetchData = useCallback(async (userId: string) => {
     if (!navigator.onLine || !userId) return;
@@ -227,22 +256,39 @@ const App: React.FC = () => {
   };
 
   const handleNavigation = (tab: string, filterValue?: any) => {
+    if (tab === activeTabRef.current) return;
+
     if (tab === 'products') {
         if (typeof filterValue === 'string') {
             setSelectedCompany(filterValue);
             setHardwareCategory(null);
-        } else if (typeof filterValue === 'object' && filterValue.productId) {
-            setSelectedProductId(filterValue.productId);
-            setSelectedCompany(null);
+            setSelectedProductId(null);
+        } else if (typeof filterValue === 'object') {
+            if (filterValue.productId) {
+                setSelectedProductId(filterValue.productId);
+                setSelectedCompany(null);
+                setHardwareCategory(null);
+            } else if (filterValue.category) {
+                setHardwareCategory(filterValue.category);
+                setSelectedCompany(null);
+                setSelectedProductId(null);
+            }
         } else {
             setSelectedCompany(null);
             setHardwareCategory(null);
+            setSelectedProductId(null);
         }
     } else if (tab === 'rcm_products') {
         setSelectedCompany(null);
-        setRcmCategory(null);
+        if (typeof filterValue === 'object' && filterValue.category) {
+            setRcmCategory(filterValue.category);
+        } else {
+            setRcmCategory(null);
+        }
     }
+
     setActiveTab(tab);
+    setTabHistory(prev => [...prev, tab]);
   };
 
   const handleCloseNotification = () => {
@@ -382,7 +428,7 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
       {notification && <PushNotificationOverlay title={notification.title} body={notification.message || notification.body} onClose={handleCloseNotification} />}
-      <Layout activeTab={activeTab} onTabChange={setActiveTab} onLogout={() => { supabaseService.signOut(); setIsLoggedIn(false); setUser(null); }} cartCount={cartItems.length} user={user} notifications={notifications} isDarkMode={false} onToggleDarkMode={() => {}} translations={{}} products={products}>
+      <Layout activeTab={activeTab} onTabChange={handleNavigation} onLogout={() => { supabaseService.signOut(); setIsLoggedIn(false); setUser(null); }} cartCount={cartItems.length} user={user} notifications={notifications} isDarkMode={false} onToggleDarkMode={() => {}} translations={{}} products={products}>
         <div className="h-full bg-white">
           <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-brand-blue" size={40} /></div>}>
             {renderMainContent()}

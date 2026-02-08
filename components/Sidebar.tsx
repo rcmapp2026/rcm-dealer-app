@@ -3,12 +3,9 @@ import {
   Home, Package, 
   ShoppingBag, User,
   LogOut, X, Crown, Bell,
-  LifeBuoy, Gift, Wallet as WalletIcon, Gamepad2, ShoppingCart, Building2, Layers
+  LifeBuoy, Gift, ShoppingCart, Layers, BookOpen
 } from 'lucide-react';
 import { UserProfile, Product } from '../types';
-import { motion as m, AnimatePresence } from 'framer-motion';
-
-const motion = m as any;
 
 interface SidebarProps {
   isOpen: boolean;
@@ -21,24 +18,6 @@ interface SidebarProps {
   translations?: any;
   products?: Product[];
 }
-
-const getCompanyColor = (name: string) => {
-  const colors = [
-    'bg-blue-500 shadow-blue-200',
-    'bg-rose-500 shadow-rose-200',
-    'bg-amber-500 shadow-amber-200',
-    'bg-emerald-500 shadow-emerald-200',
-    'bg-indigo-500 shadow-indigo-200',
-    'bg-orange-500 shadow-orange-200',
-    'bg-cyan-500 shadow-cyan-200',
-    'bg-violet-500 shadow-violet-200'
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
 
 const SidebarLink = memo(({ item, active, onNavigate, onClose }: any) => {
   const Icon = item.icon;
@@ -68,11 +47,12 @@ const SidebarLink = memo(({ item, active, onNavigate, onClose }: any) => {
 });
 
 export const Sidebar: React.FC<SidebarProps> = memo(({
-  isOpen, onClose, activeTab, onNavigate, onLogout, user, products = []
+  isOpen, onClose, activeTab, onNavigate, onLogout, user
 }) => {
   const menuItems = [
     { id: 'home', icon: Home, label: 'HOME', color: 'text-blue-500' },
-    { id: 'partners', icon: Building2, label: 'OUR BRANDS', color: 'text-orange-500' },
+    { id: 'ledger', icon: BookOpen, label: 'LEDGER', color: 'text-emerald-500' },
+    { id: 'partners', icon: BookOpen, label: 'OUR BRANDS', color: 'text-orange-500' },
     { id: 'notifications', icon: Bell, label: 'NOTIFICATIONS', color: 'text-amber-500' },
     { id: 'offers', icon: Gift, label: 'OFFERS', color: 'text-rose-500' },
     { id: 'profile', icon: User, label: 'PROFILE', color: 'text-indigo-500' },
@@ -82,14 +62,6 @@ export const Sidebar: React.FC<SidebarProps> = memo(({
     { id: 'cart', icon: ShoppingCart, label: 'CART', color: 'text-cyan-500' },
     { id: 'support', icon: LifeBuoy, label: 'SUPPORT', color: 'text-sky-500' },
   ];
-
-  const hardwareCompanies = React.useMemo(() => {
-    const names = (products || [])
-      .filter(p => !p.is_rcm && p.company?.toUpperCase() !== 'RCM' && p.company?.toUpperCase() !== 'GENUINE RCM')
-      .map(p => p.company)
-      .filter((c): c is string => typeof c === 'string' && c.trim() !== '');
-    return Array.from(new Set(names)).sort();
-  }, [products]);
 
   const SidebarContent = (
     <div className="flex flex-col h-full bg-white overflow-hidden">
@@ -122,31 +94,6 @@ export const Sidebar: React.FC<SidebarProps> = memo(({
                 <SidebarLink key={item.id} item={item} active={activeTab === item.id} onNavigate={onNavigate} onClose={onClose} />
             ))}
         </div>
-
-        {hardwareCompanies.length > 0 && (
-            <div className="space-y-3 pb-10">
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] px-2 flex items-center gap-2">
-                    <Building2 size={10} /> Quick Partners
-                </p>
-                <div className="grid grid-cols-1 gap-1">
-                    {hardwareCompanies.map((company, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => {
-                                onNavigate('products', company);
-                                onClose();
-                            }}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 active:scale-95 group"
-                        >
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center border-2 border-white shadow-md transition-all duration-300 ${getCompanyColor(company)}`}>
-                                <span className="text-[10px] font-black text-white">{company.charAt(0).toUpperCase()}</span>
-                            </div>
-                            <span className="text-[10px] font-black uppercase italic tracking-tight truncate flex-1 text-left text-slate-500 group-hover:text-black">{company}</span>
-                        </button>
-                    ))}
-                </div>
-            </div>
-        )}
       </div>
 
       <div className="p-8 border-t border-slate-50 shrink-0">
@@ -163,22 +110,13 @@ export const Sidebar: React.FC<SidebarProps> = memo(({
   return (
     <>
       <div className="hidden lg:block w-72 h-screen fixed left-0 top-0 z-50 border-r border-slate-100 shadow-sm">{SidebarContent}</div>
-      <AnimatePresence>
-        {isOpen && (
+      {isOpen && (
           <div key="sidebar-overlay" className="lg:hidden fixed inset-0 z-[60]">
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.1 }}
+            <div
                 onClick={onClose}
                 className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
-            <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            <div
                 className="absolute left-0 top-0 bottom-0 w-80 shadow-2xl overflow-hidden rounded-r-[40px] bg-white border-r border-slate-100"
             >
               {SidebarContent}
@@ -188,10 +126,9 @@ export const Sidebar: React.FC<SidebarProps> = memo(({
               >
                 <X size={20} strokeWidth={3} />
               </button>
-            </motion.div>
+            </div>
           </div>
         )}
-      </AnimatePresence>
     </>
   );
 });

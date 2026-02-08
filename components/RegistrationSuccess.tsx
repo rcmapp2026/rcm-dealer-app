@@ -55,21 +55,20 @@ interface Props {
 export const RegistrationSuccess: React.FC<Props> = ({ dealer, onComplete }) => {
   
     const handleFastVerification = () => {
-        const message = `
-Hello RCM Team! 👋
+        const message = `Hello RCM Team! 👋
 
 I've just completed my registration on the RCM app and would like to request fast verification.
 
 Here are my details:
 
-👤 **Owner Name:** ${dealer.owner_name}
-🏪 **Shop Name:** ${dealer.shop_name}
-🏙️ **City:** ${dealer.city}
-📍 **Pincode:** ${dealer.pincode}
-📱 **Mobile:** ${dealer.mobile}
+👤 *Owner Name:* *${dealer.owner_name}*
+🏪 *Shop Name:* *${dealer.shop_name}*
+🏙️ *City:* *${dealer.city}*
+📍 *Pincode:* *${dealer.pincode}*
+📱 *Mobile:* *${dealer.mobile}*
 
-Looking forward to a quick verification process! Thank you! 🙏
-        `;
+Looking forward to a quick verification process! Thank you! 🙏`;
+
         const whatsappUrl = `https://wa.me/919471217445?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     };
