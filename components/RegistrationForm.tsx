@@ -135,7 +135,16 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess, o
 
         const res = await supabaseService.registerDealer(payload);
         if (res.success && res.dealer) {
-            onSuccess(res.dealer);
+            // Ensure the returning dealer object has the fields mapped correctly for the success screen
+            const mappedDealer: UserProfile = {
+                ...res.dealer,
+                owner_name: res.dealer.owner_name || form.ownerName,
+                shop_name: res.dealer.shop_name || form.shopName,
+                city: res.dealer.city || form.city,
+                pincode: res.dealer.pincode || form.pincode,
+                mobile: res.dealer.mobile || form.mobile
+            };
+            onSuccess(mappedDealer);
         } else {
             setError(res.error || "System rejected signal. Please verify inputs.");
         }
